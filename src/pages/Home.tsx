@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -18,6 +18,7 @@ interface ISkillData {
 export function Home() {
   const [newSkill, setNewSkill] = useState('')
   const [mySkills, setMySkills] = useState<ISkillData[]>([])
+  const [greeting, setGreeting] = useState('')
 
   function handleAddNewSkill() {
     const data = {
@@ -29,10 +30,30 @@ export function Home() {
     setNewSkill('')
   }
 
+  function handleRemoveSkill(id: string) {
+    setMySkills(mySkills => mySkills.filter(skill => skill.id !== id))
+  }
+
+  useEffect(() => {
+    const currentHour = new Date().getHours()
+    if (currentHour < 12) {
+      setGreeting('Bom dia')
+    } else if (currentHour >= 12 && currentHour < 18) {
+      setGreeting('Boa tarde')
+    } else {
+      setGreeting('Boa noite')
+    }
+  }, [])
+
   return (
     <>
       <View style={styles.container}>
-        <Text style={styles.title}>Bem Vindo, Romulo</Text>
+        <Text style={styles.title}>Bem vindo, Romulo</Text>
+        
+        <Text style={styles.greetings}>
+          {greeting}
+        </Text>
+
         <TextInput 
           style={styles.input} 
           placeholder='New Skill'
@@ -41,7 +62,10 @@ export function Home() {
           onChangeText={value => setNewSkill(value)}
         />
 
-        <Button />
+        <Button 
+          title="Add"
+          onPress={handleAddNewSkill}
+        />
 
         <Text style={[styles.title, {marginVertical: 20}]}>
           My Skills
@@ -52,7 +76,10 @@ export function Home() {
           data={mySkills}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
-            <SkillCard />
+            <SkillCard 
+              skill={item.name}
+              onPress={() => handleRemoveSkill(item.id)}
+            />
           )}
         />
 
@@ -82,5 +109,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 20,    
   },
+
+  greetings: {
+    color: '#FFF',
+    fontSize: 20,
+    fontWeight: 'bold',
+  }
 
 })
