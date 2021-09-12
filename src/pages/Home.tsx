@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TextInput,
-  Platform,
-  FlatList
-} from 'react-native'
-import { Button } from '../components/Button';
-import { SkillCard } from '../components/SkillCard';
+import { FlatList } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Container, Title, Greeting, Input } from './styles'
+import { Button } from '../components/Button/Button';
+import { SkillCard } from '../components/SkillCard/SkillCard';
 
 interface ISkillData {
   id: string;
@@ -45,17 +40,37 @@ export function Home() {
     }
   }, [])
 
+  useEffect(() => {
+    async function loadData() {
+      const storagedSkills = await AsyncStorage.getItem('@myskills:skills')
+      if (storagedSkills) {
+        setMySkills(JSON.parse(storagedSkills))
+      } 
+    }
+    loadData()
+
+    // async function removeAll() {
+    //   await AsyncStorage.removeItem('@myskills:skills')
+    // }
+  }, [])
+
+  useEffect(() => {
+    async function saveData() {
+      await AsyncStorage.setItem('@myskills:skills', JSON.stringify(mySkills))
+    }
+    saveData()
+  }, [mySkills])
+
   return (
     <>
-      <View style={styles.container}>
-        <Text style={styles.title}>Bem vindo, Romulo</Text>
+      <Container>
+        <Title>Bem vindo, Romulo</Title>
         
-        <Text style={styles.greetings}>
+        <Greeting>
           {greeting}
-        </Text>
+        </Greeting>
 
-        <TextInput 
-          style={styles.input} 
+        <Input  
           placeholder='New Skill'
           placeholderTextColor='#555'
           value={newSkill}
@@ -67,9 +82,9 @@ export function Home() {
           onPress={handleAddNewSkill}
         />
 
-        <Text style={[styles.title, {marginVertical: 20}]}>
+        <Title style={{marginVertical: 20}}>
           My Skills
-        </Text>
+        </Title>
 
         <FlatList 
           showsVerticalScrollIndicator={false}
@@ -83,37 +98,7 @@ export function Home() {
           )}
         />
 
-      </View>
+      </Container>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#121015',
-    paddingHorizontal: 30,
-    paddingVertical: 70,
-  },
-
-  title: {
-    color: '#FFF',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-
-  input: {
-    padding: Platform.OS === 'ios' ? 15 : 6,
-    backgroundColor: 'grey',
-    borderRadius: 7,
-    fontSize: 18,
-    marginTop: 20,    
-  },
-
-  greetings: {
-    color: '#FFF',
-    fontSize: 20,
-    fontWeight: 'bold',
-  }
-
-})
